@@ -1,26 +1,34 @@
 import { WebSocketServer } from "ws";
-import http from "http";
 
-const server = http.createServer();
-const wss = new WebSocketServer({ server });
+const PORT = process.env.PORT || 3000;
+const wss = new WebSocketServer({ port: PORT });
+
+console.log(`✅ YIYIQ Signaling Server corriendo en puerto ${PORT}`);
 
 wss.on("connection", (ws) => {
-  console.log("🔗 Nueva conexión WebSocket");
+  console.log("🟢 Cliente conectado");
 
   ws.on("message", (message) => {
     try {
       const data = JSON.parse(message);
       console.log("📩 Mensaje recibido:", data);
 
-      // Reenvía el mensaje a todos los clientes excepto el que lo envió
+      // Reenvía a todos los clientes menos al emisor
       wss.clients.forEach((client) => {
-        if (client !== ws && client.readyState === 1) {
+        if (client !== ws && client.readyState === ws.OPEN) {
           client.send(JSON.stringify(data));
         }
       });
-    } catch (error) {
-      console.error("❌ Error procesando mensaje:", error);
+    } catch (err) {
+      console.error("❌ Error al procesar mensaje:", err);
     }
+  });
+
+  ws.on("close", () => {
+    console.log("🔴 Cliente desconectado");
+  });
+});
+
   });
 
   ws.on("close", () => {
