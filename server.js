@@ -39,3 +39,29 @@ wss.on("connection", (ws) => {
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log(`🚀 Ser
+import express from "express";
+import { WebSocketServer } from "ws";
+
+const app = express();
+const PORT = process.env.PORT || 10000;
+
+// Ruta raíz para verificar que el servidor está vivo
+app.get("/", (req, res) => {
+  res.send("✅ YIYIQ Signaling Server ACTIVO - WebRTC Ready");
+});
+
+const server = app.listen(PORT, () => {
+  console.log(`Servidor corriendo en el puerto ${PORT}`);
+});
+
+const wss = new WebSocketServer({ server });
+
+wss.on("connection", (ws) => {
+  console.log("Cliente conectado al servidor WebSocket");
+
+  ws.on("message", (message) => {
+    ws.send(`Echo desde el servidor: ${message}`);
+  });
+
+  ws.on("close", () => console.log("Cliente desconectado"));
+});
